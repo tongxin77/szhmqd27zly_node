@@ -3,7 +3,22 @@ const express = require('express')
 
 const path=require('path')
 
+var bodyParser = require('body-parser')
+
+var session = require('express-session')
+
+
+
 const app = express()
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+ 
+// parse application/json
+app.use(bodyParser.json())
+
+app.use(session({ secret: 'keyboard cat', cookie: { maxAge: 600000 }}))
+
 
 // 处理请求
 const accountRouter=require(path.join(__dirname,'./routers/accountRouter.js'))
@@ -18,6 +33,6 @@ app.listen(7788,'127.0.0.1',err=>{
         console.log(err);
         
     }
-    console.log('ok');
+    console.log('ok'); 
     
 }) 

@@ -18,6 +18,16 @@ const accountController=require(path.join(__dirname,'../controllers/accountContr
 //获取注册页面的请求
 
 accountRouter.get('/register',accountController.getRegisterPage)
+// 获取登录页面的请求
+accountRouter.get('/login',accountController.getLoginPage)
+// 获取验证码的请求
+accountRouter.get('/vcode',accountController.getVcodePage)
+
+
+// 获取注册页面的post
+accountRouter.post('/register',accountController.register)
+// 获取登录页面的post
+accountRouter.post('/login',accountController.login)
 
 //导出路由对象
 module.exports=accountRouter
