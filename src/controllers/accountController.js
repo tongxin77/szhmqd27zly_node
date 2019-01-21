@@ -73,7 +73,6 @@ exports.getLoginPage = (req, res) => {
 
 // 导出验证码
 exports.getVcodePage = (req, res) => {
-    
 
     const vcode1 = parseInt(Math.random() * 9000 + 1000)
 
@@ -94,8 +93,8 @@ exports.getVcodePage = (req, res) => {
 
 // 导出登录
 exports.login = (req, res) => {
-    console.log(req.session);
-    console.log(req.body);
+    // console.log(req.session);
+    // console.log(req.body);
 
     const result = {
         "status": 0,
@@ -104,7 +103,7 @@ exports.login = (req, res) => {
 
     const {vcode,username,password} = req.body
     const {vcode1} = req.session
-    console.log(vcode1)
+    console.log(vcode,vcode1)
     if (vcode != vcode1) {
         result.status = 1
         result.message = "验证码错误"
@@ -122,17 +121,14 @@ exports.login = (req, res) => {
     
             collection.findOne({username,password}, (err, doc) => {
                 // 如果doc 为null 说明数据库没有这条文档，如果不为null 说明不成功
-                console.log(doc);
+                // console.log(doc);
                 if (!doc) {
                     result.status = 2
                     result.message = "用户名或密码错误"
         
-                    client.close();
-                    res.json(result)
-                }else{
-                    client.close();
-                    res.json(result)
                 }
+                client.close();
+                res.json(result)
             });
         });
     }

@@ -70,14 +70,11 @@
         const password = $.md5($("#passwordId").val() + "@#*&_77");
         $.post({
             url: "/account/login",
-            data: {
-                username:username,
-                password:password,
-                vcode:vcode
-            },
+            data: {username,password,vcode},
             success: function (res) {
                if(res.status!=0){
                   alert( res.message)
+                  $('#vcodeimgId').attr('src', `/account/vcode?accountvcodeimg=${Math.random()}`)
 
                }else{
                    location='/student/index'

@@ -20,6 +20,9 @@ const accountController=require(path.join(__dirname,'../controllers/accountContr
 accountRouter.get('/register',accountController.getRegisterPage)
 // 获取登录页面的请求
 accountRouter.get('/login',accountController.getLoginPage)
+// accountRouter.get('/login',(req,res)=>{
+//     res.send("1111111111111111111111111")
+// })
 // 获取验证码的请求
 accountRouter.get('/vcode',accountController.getVcodePage)
 
