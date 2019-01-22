@@ -32,6 +32,11 @@ accountRouter.get('/vcode',accountController.getVcodePage)
 accountRouter.post('/register',accountController.register)
 // 获取登录页面的post
 accountRouter.post('/login',accountController.login)
+// 退出登录的请求
+accountRouter.get('/logout',accountController.logout)
+
+
+
 
 //导出路由对象
 module.exports=accountRouter

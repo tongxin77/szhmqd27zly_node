@@ -2,42 +2,71 @@ const path = require('path')
 
 const template = require('art-template')
 
-// 导包
-const MongoClient = require('mongodb').MongoClient;
+const dataBase = require(path.join(__dirname, '../tools/dataBaseTool.js'))
 
-// Connection URL
-const url = 'mongodb://localhost:27017';
 
-// Database Name
-const dbName = 'szhmqd27';
 
 // 导出
 exports.getIndexPage = (req, res) => {
-    console.log(req);
-    
-    const keyword=req.query.keyword||""
+
+    const keyword = req.query.keyword || ""
 
     // Use connect method to connect to the server
-    MongoClient.connect(url, { useNewUrlParser: true }, function (err, client) {
 
-        const db = client.db(dbName);
-        // 获取到要操作的集合
-        const collection = db.collection('studentname');
+    dataBase.findMany('studentname', { name: { $regex: `${keyword}` } }, (err, docs) => {
+        var html = template(path.join(__dirname, '../public/html/index.html'), { students: docs, keyword,loginname:req.session.loginname });
+        res.send(html)
 
-        
+    })
+}
+exports.getAddPage = (req, res) => {
+    var html = template(path.join(__dirname, '../public/html/add.html'), {loginname:req.session.loginname});
+    res.send(html)
+}
+exports.getAdd = (req, res) => {
+    dataBase.insertOne('studentname', req.body, (err, result) => {
+        if (!result) {
+            res.send("<script>alert('插入失败')</script>")
+        } else {
+            res.send("<script>location='/student/index'</script>")
+        }
+    })
+}
 
-        collection.find({name:{$regex:`${keyword}`}}).toArray((err, docs) => {
-            console.log(docs);
-            var html = template(path.join(__dirname, '../public/html/index.html'), { students: docs,keyword });
-            res.send(html)
+exports.getEdit = (req, res) => {
+    console.log(1111);
 
-        });
+    const _id = dataBase.objectId(req.params.studentId)
+    console.log(_id);
 
-        client.close();
+    dataBase.findOne('studentname', { _id }, (err, doc) => {
+        doc.loginname=req.session.loginname
+        const html = template(path.join(__dirname, '../public/html/edit.html'), doc)
+        res.send(html)
     })
 
 }
 
-// module.exports = {
-//     getindexPage 
-//   };
+exports.getEditPage = (req, res) => {
+    const _id = dataBase.objectId(req.params.studentId)
+
+    dataBase.updateOne('studentname', { _id }, req.body, (err, result) => {
+        console.log(result);
+
+        if (result.modifiedCount != 1) {
+            res.send("<script>alert('修改失败')</script>")
+        } else {
+            res.send("<script>location='/student/index'</script>")
+        }
+    })
+}
+exports.deletestudent = (req, res) => {
+    const _id = dataBase.objectId(req.params.studentId)
+    dataBase.deleteOne('studentname', { _id }, (err, result) => {
+        if (!result) {
+            res.send("<script>alert('删除失败')</script>")
+        } else {
+            res.send("<script>location='/student/index'</script>")
+        }
+    })
+}

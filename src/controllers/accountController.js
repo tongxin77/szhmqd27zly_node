@@ -1,14 +1,11 @@
 const path = require('path')
 // 导包
-const MongoClient = require('mongodb').MongoClient;
+
+const dataBase=require(path.join(__dirname, '../tools/dataBaseTool.js'))
 
 var captchapng = require('captchapng')
 
-// Connection URL
-const url = 'mongodb://localhost:27017';
 
-// Database Name
-const dbName = 'szhmqd27';
 
 // 导出
 exports.getRegisterPage = (req, res) => {
@@ -23,45 +20,30 @@ exports.register = (req, res) => {
         "message": "注册成功"
     }
 
-    // 拿到浏览器传过来的数据 body-parser
+    // 拿到浏览器传过来的数据 body-parser 
     const {
         username
     } = req.body
 
     // console.log(username);
-    MongoClient.connect(url, function (err, client) {
+    dataBase.findOne('accountname',{username},(err,doc)=>{
+        if (doc) {
+            result.status = 1
+            result.message = "用户名已经存在"
 
-        const db = client.db(dbName);
-        // 拿到集合
-        const collection = db.collection('accountname');
-        // console.log(collection);
-
-        collection.findOne({
-            username
-        }, (err, doc) => {
-            // 如果doc 为null 说明数据库没有这条文档，如果不为null 说明不成功
-            if (doc) {
-                result.status = 1
-                result.message = "用户名已经存在"
-
-                client.close();
-                res.json(result)
-            } else {
-                collection.insertOne(req.body, (err, data) => {
-                    console.log(data);
-
-                    if (!data) {
-                        result.status = 2
-                        result.message = "注册失败"
-                        client.close();
-                        res.json(result)
-                    }
+            res.json(result)
+        } else {
+            dataBase.insertOne('accountname',req.body,(err, data) => {
+                if (!data) {
+                    result.status = 2
+                    result.message = "注册失败"
                     client.close();
                     res.json(result)
-                })
-            }
-        });
-    });
+                }
+                res.json(result)
+            })
+        }
+    })
 
 }
 
@@ -103,33 +85,30 @@ exports.login = (req, res) => {
 
     const {vcode,username,password} = req.body
     const {vcode1} = req.session
-    console.log(vcode,vcode1)
+    // console.log(vcode,vcode1)
     if (vcode != vcode1) {
         result.status = 1
         result.message = "验证码错误"
 
         res.json(result)
-        return false
-        
-    }else{
-        MongoClient.connect(url, function (err, client) {
-
-            const db = client.db(dbName);
-            // 拿到集合
-            const collection = db.collection('accountname');
-            // console.log(collection);
-    
-            collection.findOne({username,password}, (err, doc) => {
-                // 如果doc 为null 说明数据库没有这条文档，如果不为null 说明不成功
-                // console.log(doc);
-                if (!doc) {
-                    result.status = 2
-                    result.message = "用户名或密码错误"
-        
-                }
-                client.close();
-                res.json(result)
-            });
-        });
+        return       
     }
+        dataBase.findOne('accountname',{username,password},(err, doc) => {
+            // 如果doc 为null 说明数据库没有这条文档，如果不为null 说明不成功
+            // console.log(doc);
+            if (!doc) {
+                result.status = 2
+                result.message = "用户名或密码错误"
+    
+            }else{
+                req.session.loginname=username
+            }
+            res.json(result)
+        })
+}
+
+// 
+exports.logout=(req,res)=>{
+    req.session.loginname=null
+    res.send("<script>location='/account/login'</script>")
 }

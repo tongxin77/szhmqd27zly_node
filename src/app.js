@@ -20,10 +20,23 @@ app.use(bodyParser.json())
 app.use(session({ secret: 'keyboard cat', resave:false,saveUninitialized:false,cookie: { maxAge: 600000 }}))
 
 
-
+// 配置静态资源
 app.use(express.static(path.join(__dirname,'public')))
 
-// 处理请求
+// 拦截所有请求
+app.all('/*',(req,res,next)=>{
+    if(req.url.includes('account')){
+        next()
+    }else{
+        if(req.session.loginname){
+            next()
+        }else{
+            res.send("<script>alert('你还没有登录,请先登录');location='/account/login'</script>")
+        }  
+    }
+})
+
+// 处理请求 导入路由
 const accountRouter=require(path.join(__dirname,'./routers/accountRouter.js'))
 const studentRouter=require(path.join(__dirname,'./routers/studentRouter.js'))
 
